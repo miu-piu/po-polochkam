@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f6f7f2">
+  <meta name="description" content="По полочкам — макеты наклеек для печати через Label Expert. Работает на телефоне и компьютере, даже без интернета.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="По полочкам">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>По полочкам — этикетки для дома</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="brand"><strong>По полочкам</strong><small>Наклейки для всего дома</small></div>
+    <div class="header-actions"><span class="offline-tag">Работает офлайн</span><button class="mini ghost" id="installBtn" hidden>Установить</button></div>
+  </header>
+  <main class="shell">
+    <section class="panel library" aria-labelledby="libraryTitle">
+      <div class="panel-head"><div><span class="eyebrow">01 / Библиотека</span><h1 id="libraryTitle">Что подписать?</h1></div><span id="catalogCount" class="counter"></span></div>
+      <div class="search-wrap"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Крупы, одежда, кабели…" autocomplete="off" aria-label="Поиск наклеек"></div>
+      <div id="categories" class="categories" role="group" aria-label="Категории"></div>
+      <div class="list-head"><span id="resultsTitle">Готовые названия</span><span id="resultsCount"></span></div>
+      <div id="libraryList" class="library-list" role="list"></div>
+      <div class="library-footer"><button id="combineBtn" class="secondary full" disabled>Объединить отмеченные <span id="markedCount"></span></button><p>«+» — отдельная наклейка. Галочки — объединить названия в одну.</p></div>
+    </section>
+
+    <section class="panel studio" aria-labelledby="studioTitle">
+      <div class="panel-head"><div><span class="eyebrow">02 / Макет</span><h2 id="studioTitle">Как разместить?</h2></div><span class="paper-badge">75 × 120 мм</span></div>
+      <div class="modes" role="group" aria-label="Режим макета">
+        <button type="button" class="mode" data-mode="triple" aria-pressed="true"><span class="mode-illustration three"><i></i><i></i><i></i></span><span>3 на одной</span></button>
+        <button type="button" class="mode" data-mode="portrait" aria-pressed="false"><span class="mode-illustration tall"><i></i></span><span>1 вертикально</span></button>
+        <button type="button" class="mode" data-mode="landscape" aria-pressed="false"><span class="mode-illustration wide"><i></i></span><span>1 горизонтально</span></button>
+      </div>
+      <p id="modeHint" class="mode-hint"></p>
+      <div class="preview-stage"><canvas id="preview" width="600" height="960" role="img" aria-label="Предпросмотр этикетки"></canvas></div>
+      <div class="editor">
+        <div class="edit-title"><strong>Твоя наклейка</strong><button class="linkish" type="button" id="resetDraft">Очистить</button></div>
+        <label for="titleInput">Название</label><textarea id="titleInput" rows="2" maxlength="140" placeholder="Например: МАКАРОНЫ · КРУПЫ · СЕМЕНА"></textarea>
+        <div class="edit-grid"><div><label for="detailInput">Подпись <span class="muted">необязательно</span></label><input id="detailInput" maxlength="90" placeholder="Например: сухие продукты"></div><div><label for="iconSelect">Значок</label><select id="iconSelect"><option value="auto">Автоматически</option><option value="none">Без значка</option><option value="box">Коробка</option><option value="kitchen">Кухня</option><option value="clothes">Одежда</option><option value="toy">Игрушки</option><option value="plug">Техника</option><option value="clean">Уборка</option><option value="heart">Уход</option><option value="document">Документы</option><option value="paw">Животные</option><option value="star">Праздники</option><option value="tools">Инструменты</option></select></div></div>
+        <button class="primary full" id="addDraft">Добавить в очередь <span aria-hidden="true">＋</span></button>
+      </div>
+    </section>
+
+    <section class="panel print" aria-labelledby="printTitle">
+      <div class="panel-head"><div><span class="eyebrow">03 / Печать</span><h2 id="printTitle">Очередь</h2></div><span id="queueCount" class="counter">0</span></div>
+      <p class="quiet">Добавленные наклейки собираются в PDF. Для проверки можно скачать отдельную страницу как PNG.</p>
+      <div id="queueList" class="queue-list" aria-live="polite"></div>
+      <div class="queue-meta"><span id="pageCount">0 листов</span><button class="linkish" id="clearQueue">Очистить</button></div>
+      <div class="export-area"><button id="pdfBtn" class="primary full">Скачать PDF · вся очередь</button><button id="pngBtn" class="secondary full">Скачать PNG · первый лист</button><button id="shareBtn" class="secondary full">Поделиться PDF</button></div>
+      <div class="howto"><strong>Как печатать</strong><p>Скачай файл → открой его в <b>Label Expert</b> → выбери размер 75 × 120 мм, масштаб 100% и печать без обрезки.</p><small>Первый раз проверь одну пробную наклейку: импорт и масштабирование зависят от версии Label Expert и настроек принтера.</small></div>
+    </section>
+  </main>
+  <div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
+  <footer class="site-footer">Все макеты создаются на устройстве. Без аккаунтов, рекламы и отправки данных на сервер.</footer>
+  <script src="./catalog.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
