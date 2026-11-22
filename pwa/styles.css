@@ -23,3 +23,30 @@ button,input,textarea,select{font-family:-apple-system,BlinkMacSystemFont,"Segoe
 @media(max-width:760px){.topbar{padding:11px 14px;min-height:70px}.brand strong{font-size:22px}.brand small{font-size:10px}.app-icon{width:39px;height:40px}.app-icon-lines{font-size:24px}.offline-tag{display:none}.mode-ribbon{position:sticky;top:0}.ribbon-content{padding:8px 7px;gap:0;display:block}.ribbon-caption,.ribbon-size{display:none}.modes{width:100%}.mode{flex:1;justify-content:center;gap:4px;padding:7px 3px;font-size:11px}.mode-mini{width:14px;height:22px}.shell{display:flex;flex-direction:column;padding:10px;gap:12px}.panel{width:100%;padding:16px}.panel-head{margin-bottom:13px}.library-list{height:270px}.preview-stage{min-height:295px;padding:15px}.preview-paper canvas{max-height:340px}.preview-paper.landscape canvas{max-height:235px}.slot-actions button{font-size:11px}.edit-grid{grid-template-columns:minmax(0,1fr) minmax(120px,135px)}.print{grid-column:auto}.export-area{display:flex}.site-footer{padding:15px 12px 28px}}
 @media(max-width:390px){.mode{font-size:10px}.mode-mini{display:none}.brand strong{font-size:20px}.slot-actions{gap:3px}.slot-actions button{font-size:10px;padding:5px 3px}.edit-grid{gap:7px}.auto-note{font-size:9px}}
 @media(prefers-reduced-motion:no-preference){button{transition:filter .12s,background-color .14s}}
+
+/* v3.1: ровная бумага и едва заметный рельеф кнопок */
+body{background:#eadcc5}
+.topbar{background:#704a35;border-bottom:1px solid #513525}
+.topbar:after{display:none}
+.app-icon{background:#f1e3ca}
+.mode-ribbon{background:#f6e9d4}
+.modes{background:#e6d6be}
+.panel{background:#fffaf0}
+.panel:before{display:none}
+.search-wrap{background:#fffdf7}
+.entry:nth-child(even){background:#fffdf7}
+.preview-stage{background:#decaaf}
+.howto{background:#f8ecda}
+.dialog-panel{background:#fff9ed}
+.toolbar-button{background:linear-gradient(180deg,#876049,#815a43);box-shadow:inset 0 1px rgba(255,255,255,.24),0 1px 2px rgba(50,27,15,.20)}
+.mode[aria-pressed=true]{background:linear-gradient(180deg,#fffaf2,#f7efdf);box-shadow:inset 0 1px #fff,0 1px 2px rgba(65,42,24,.12)}
+.category{background:linear-gradient(180deg,#fbf4e8,#f5ecde)}
+.category.active{background:linear-gradient(180deg,#855b42,#7d543e)}
+.add-mini{background:linear-gradient(180deg,#f7e8d1,#f3e1c7)}
+.primary{background:linear-gradient(180deg,#936648,#8b6144);box-shadow:inset 0 1px rgba(255,255,255,.28),0 1px 2px rgba(71,43,24,.20)}
+.secondary{background:linear-gradient(180deg,#f9eedc,#f4e9d7);box-shadow:inset 0 1px rgba(255,255,255,.75),0 1px 2px rgba(70,43,23,.12)}
+.paper-button{background:linear-gradient(180deg,#fffbf4,#faf4e9);box-shadow:inset 0 1px #fff,0 1px 2px rgba(70,43,23,.12)}
+.small-button{background:linear-gradient(180deg,#fbf1e1,#f5ead9);box-shadow:inset 0 1px #fff,0 1px 2px rgba(70,43,23,.10)}
+.slot-button{background:linear-gradient(180deg,#fdf5e9,#f7eddf)}
+.slot-button.active{background:linear-gradient(180deg,#8b6046,#835a42)}
+.toast{background:#76513a}
