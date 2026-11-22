@@ -3,62 +3,81 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#f6f7f2">
-  <meta name="description" content="По полочкам — макеты наклеек для печати через Label Expert. Работает на телефоне и компьютере, даже без интернета.">
+  <meta name="theme-color" content="#6b422e">
+  <meta name="description" content="По полочкам — уютный редактор наклеек 75×120 мм для печати через Label Expert. Работает без интернета.">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="По полочкам">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles.css">
-  <title>По полочкам — этикетки для дома</title>
+  <title>По полочкам — домашние наклейки</title>
 </head>
 <body>
   <header class="topbar">
-    <div class="logo-mark" aria-hidden="true"><span></span><span></span><span></span></div>
-    <div class="brand"><strong>По полочкам</strong><small>Наклейки для всего дома</small></div>
-    <div class="header-actions"><span class="offline-tag">Работает офлайн</span><button class="mini ghost" id="installBtn" hidden>Установить</button></div>
+    <div class="app-icon" aria-hidden="true"><span class="app-icon-lines">▤</span></div>
+    <div class="brand"><strong>По полочкам</strong><small>Домашний блокнот наклеек</small></div>
+    <div class="header-actions"><span class="offline-tag">Всё хранится у вас</span><button class="toolbar-button" type="button" id="helpBtn" aria-label="Как пользоваться">?</button><button class="toolbar-button install" type="button" id="installBtn" hidden>Установить</button></div>
   </header>
+
+  <section class="mode-ribbon" aria-label="Режим листа">
+    <div class="ribbon-content">
+      <span class="ribbon-caption">МАКЕТ ЛИСТА</span>
+      <div class="modes" role="group" aria-label="Расположение наклеек">
+        <button class="mode" type="button" data-mode="triple" aria-pressed="true"><span class="mode-mini triple"><i></i><i></i><i></i></span>3 на листе</button>
+        <button class="mode" type="button" data-mode="portrait" aria-pressed="false"><span class="mode-mini portrait"><i></i></span>1 вертикальная</button>
+        <button class="mode" type="button" data-mode="landscape" aria-pressed="false"><span class="mode-mini landscape"><i></i></span>1 горизонтальная</button>
+      </div>
+      <span class="ribbon-size">75 × 120 мм</span>
+    </div>
+  </section>
+
   <main class="shell">
     <section class="panel library" aria-labelledby="libraryTitle">
-      <div class="panel-head"><div><span class="eyebrow">01 / Библиотека</span><h1 id="libraryTitle">Что подписать?</h1></div><span id="catalogCount" class="counter"></span></div>
-      <div class="search-wrap"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Крупы, одежда, кабели…" autocomplete="off" aria-label="Поиск наклеек"></div>
-      <div id="categories" class="categories" role="group" aria-label="Категории"></div>
-      <div class="list-head"><span id="resultsTitle">Готовые названия</span><span id="resultsCount"></span></div>
-      <div id="libraryList" class="library-list" role="list"></div>
-      <div class="library-footer"><button id="combineBtn" class="secondary full" disabled>Объединить отмеченные <span id="markedCount"></span></button><p>«+» — отдельная наклейка. Галочки — объединить названия в одну.</p></div>
+      <div class="panel-head"><div><span class="eyebrow">Картотека</span><h1 id="libraryTitle">Готовые названия</h1></div><span class="counter" id="catalogCount"></span></div>
+      <div class="search-wrap"><span class="search-glass" aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Например, крупы или игрушки" autocomplete="off" aria-label="Поиск названий"></div>
+      <div class="categories" id="categories" role="group" aria-label="Категории"></div>
+      <div class="list-head"><span id="resultsTitle">Все названия</span><span id="resultsCount"></span></div>
+      <div class="library-list" id="libraryList" role="list"></div>
+      <div class="library-footer">
+        <button type="button" class="secondary full" id="combineBtn" disabled>Объединить выбранные <span id="markedCount"></span></button>
+        <button type="button" class="paper-button full" id="customBtn">＋ Своя наклейка</button>
+        <p><b>Нажми на название</b> — добавится в выбранное место на листе. Галочки объединяют названия в одну наклейку.</p>
+      </div>
     </section>
 
     <section class="panel studio" aria-labelledby="studioTitle">
-      <div class="panel-head"><div><span class="eyebrow">02 / Макет</span><h2 id="studioTitle">Как разместить?</h2></div><span class="paper-badge">75 × 120 мм</span></div>
-      <div class="modes" role="group" aria-label="Режим макета">
-        <button type="button" class="mode" data-mode="triple" aria-pressed="true"><span class="mode-illustration three"><i></i><i></i><i></i></span><span>3 на одной</span></button>
-        <button type="button" class="mode" data-mode="portrait" aria-pressed="false"><span class="mode-illustration tall"><i></i></span><span>1 вертикально</span></button>
-        <button type="button" class="mode" data-mode="landscape" aria-pressed="false"><span class="mode-illustration wide"><i></i></span><span>1 горизонтально</span></button>
-      </div>
-      <p id="modeHint" class="mode-hint"></p>
-      <div class="preview-stage"><canvas id="preview" width="600" height="960" role="img" aria-label="Предпросмотр этикетки"></canvas></div>
+      <div class="panel-head"><div><span class="eyebrow">Рабочий стол</span><h2 id="studioTitle">Твой лист</h2></div><span class="paper-badge" id="sheetNumber">Лист 1 из 1</span></div>
+      <div class="sheet-nav"><button id="prevSheet" class="small-button" type="button" aria-label="Предыдущий лист">‹</button><button id="newSheet" class="small-button plus-sheet" type="button">＋ Новый лист</button><button id="nextSheet" class="small-button" type="button" aria-label="Следующий лист">›</button><button id="deleteSheet" class="quiet-button" type="button" title="Удалить лист">Удалить</button></div>
+      <p id="modeHint" class="mode-hint">Три отдельные наклейки на одном листе.</p>
+      <div class="preview-stage"><div class="preview-paper" id="previewPaper"><canvas id="preview" width="600" height="960" role="img" aria-label="Предпросмотр листа"></canvas><div id="slotOverlay" class="slot-overlay" aria-label="Выбор наклейки на листе"></div></div></div>
+      <div class="slot-bar"><span class="slot-legend" id="slotLegend">Редактируется наклейка 1</span><div class="slot-buttons" id="slotButtons"></div></div>
+      <div class="slot-actions"><button id="duplicateSlot" type="button" class="quiet-button">Дублировать</button><button id="moveUp" type="button" class="quiet-button">↑ Выше</button><button id="moveDown" type="button" class="quiet-button">↓ Ниже</button><button id="clearSlot" type="button" class="quiet-button danger">Очистить наклейку</button></div>
       <div class="editor">
-        <div class="edit-title"><strong>Твоя наклейка</strong><button class="linkish" type="button" id="resetDraft">Очистить</button></div>
-        <label for="titleInput">Название</label><textarea id="titleInput" rows="2" maxlength="140" placeholder="Например: МАКАРОНЫ · КРУПЫ · СЕМЕНА"></textarea>
-        <div class="edit-grid"><div><label for="detailInput">Подпись <span class="muted">необязательно</span></label><input id="detailInput" maxlength="90" placeholder="Например: сухие продукты"></div><div><label for="iconSelect">Значок</label><select id="iconSelect"><option value="auto">Автоматически</option><option value="none">Без значка</option><option value="box">Коробка</option><option value="kitchen">Кухня</option><option value="clothes">Одежда</option><option value="toy">Игрушки</option><option value="plug">Техника</option><option value="clean">Уборка</option><option value="heart">Уход</option><option value="document">Документы</option><option value="paw">Животные</option><option value="star">Праздники</option><option value="tools">Инструменты</option></select></div></div>
-        <button class="primary full" id="addDraft">Добавить в очередь <span aria-hidden="true">＋</span></button>
+        <div class="edit-title"><strong>Подпись <span id="editorSlot">№ 1</span></strong><span class="auto-note">Сохраняется автоматически</span></div>
+        <label for="titleInput">Название</label><textarea id="titleInput" rows="2" maxlength="160" placeholder="Например: МАКАРОНЫ · КРУПЫ · СЕМЕНА"></textarea>
+        <div class="edit-grid"><div><label for="detailInput">Подпись <span class="muted">необязательно</span></label><input id="detailInput" maxlength="100" placeholder="Например: сухие продукты"></div><div><label for="iconSelect">Значок</label><div class="icon-input"><select id="iconSelect"><option value="auto">Авто</option><option value="none">Без значка</option></select><button id="pickIconBtn" type="button" title="Подбор иконки" aria-label="Выбрать значок">▦</button></div></div></div>
+        <div class="editor-bottom"><button id="fillNext" class="primary" type="button">Следующая пустая +</button><button id="clearSheet" class="quiet-button" type="button">Очистить лист</button></div>
       </div>
     </section>
 
     <section class="panel print" aria-labelledby="printTitle">
-      <div class="panel-head"><div><span class="eyebrow">03 / Печать</span><h2 id="printTitle">Очередь</h2></div><span id="queueCount" class="counter">0</span></div>
-      <p class="quiet">Добавленные наклейки собираются в PDF. Для проверки можно скачать отдельную страницу как PNG.</p>
+      <div class="panel-head"><div><span class="eyebrow">Типография</span><h2 id="printTitle">Листы к печати</h2></div><span class="counter" id="queueCount">0</span></div>
+      <p class="quiet">Листы сохраняются автоматически. Можно подготовить разные макеты и скачать их одним PDF.</p>
       <div id="queueList" class="queue-list" aria-live="polite"></div>
-      <div class="queue-meta"><span id="pageCount">0 листов</span><button class="linkish" id="clearQueue">Очистить</button></div>
-      <div class="export-area"><button id="pdfBtn" class="primary full">Скачать PDF · вся очередь</button><button id="pngBtn" class="secondary full">Скачать PNG · первый лист</button><button id="shareBtn" class="secondary full">Поделиться PDF</button></div>
-      <div class="howto"><strong>Как печатать</strong><p>Скачай файл → открой его в <b>Label Expert</b> → выбери размер 75 × 120 мм, масштаб 100% и печать без обрезки.</p><small>Первый раз проверь одну пробную наклейку: импорт и масштабирование зависят от версии Label Expert и настроек принтера.</small></div>
+      <div class="queue-meta"><span id="pageCount">0 листов</span><button type="button" id="clearQueue" class="linkish">Очистить все</button></div>
+      <div class="export-area"><button id="pdfBtn" type="button" class="primary full">Скачать PDF · все листы</button><button id="pngBtn" type="button" class="secondary full">PNG · текущий лист</button><button id="shareBtn" type="button" class="paper-button full">Поделиться PDF</button></div>
+      <div class="howto"><strong>Печать в Label Expert</strong><p>Скачай PDF или PNG → открой в Label Expert → размер бумаги <b>75 × 120 мм</b> → масштаб <b>100%</b>, без обрезки.</p><small>Тёплая бумага видна только в редакторе. Для печати фон белый, надписи и пиктограммы чёрные. Перед большой партией сделайте один пробный отпечаток.</small></div>
     </section>
   </main>
+
+  <div class="dialog-backdrop" id="iconDialog" hidden role="dialog" aria-modal="true" aria-labelledby="iconDialogTitle">
+    <div class="dialog-panel"><div class="dialog-head"><h2 id="iconDialogTitle">Выбрать значок</h2><button class="close-dialog" id="closeIconBtn" type="button" aria-label="Закрыть">×</button></div><input id="iconSearch" type="search" placeholder="Поиск: еда, одежда, игрушки…" aria-label="Поиск значка"><div id="iconGrid" class="icon-grid"></div></div>
+  </div>
+  <div class="dialog-backdrop" id="helpDialog" hidden role="dialog" aria-modal="true" aria-labelledby="helpDialogTitle"><div class="dialog-panel"><div class="dialog-head"><h2 id="helpDialogTitle">Как пользоваться</h2><button class="close-dialog" id="closeHelpBtn" type="button" aria-label="Закрыть">×</button></div><p>Выбери один из трёх режимов наверху. На листе с тремя наклейками нажми на область № 1, 2 или 3, затем выбери название в картотеке или напиши своё.</p><p>Добавь новый лист кнопкой «＋ Новый лист». В конце скачай PDF со всеми заполненными листами.</p><p>Никакой регистрации и синхронизации нет: черновики остаются в браузере именно этого устройства.</p></div></div>
   <div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
-  <footer class="site-footer">Все макеты создаются на устройстве. Без аккаунтов, рекламы и отправки данных на сервер.</footer>
-  <script src="./catalog.js"></script>
-  <script src="./app.js"></script>
+  <footer class="site-footer">Сделано для домашних порядков • Без аккаунта и облака</footer>
+  <script src="./catalog.js"></script><script src="./app.js"></script>
 </body>
 </html>
