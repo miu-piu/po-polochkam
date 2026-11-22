@@ -40,6 +40,7 @@ function parseBatch(){
   try{data=JSON.parse(str)}catch(e){throw Error(`Ошибка JSON: ${e.message}`)}
   if(Array.isArray(data))input=data;
   else if(data&&typeof data==='object'){
+   if(data.version!==undefined&&data.version!==1)throw Error('Неподдерживаемая версия JSON: требуется \"version\": 1.');
    defaultFormat=data.defaultFormat??'triple';
    input=data.labels??data.items;
   }

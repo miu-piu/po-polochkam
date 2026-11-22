@@ -115,6 +115,7 @@
         <p class="batch-hint">Опишите, что нужно подписать. Приложение подготовит готовый запрос для ChatGPT с точными правилами JSON, доступными иконками и форматами. Само обращение к ИИ выполняется в отдельном чате.</p>
         <label for="aiItems">Что нужно подписать</label>
         <textarea id="aiItems" rows="5" maxlength="12000" placeholder="Например: коробки с зимней одеждой, шапками, документами, проводами, мелкими игрушками. Нужно 30 наклеек, часть больших."></textarea>
+        <p class="batch-hint">Если перечень вещей находится в документе или таблице, приложите файл к сообщению в ChatGPT вместе с промптом. Здесь достаточно написать, что следует использовать этот файл.</p>
         <div class="batch-ai-options">
           <div><label for="aiFormat">Расположение наклеек</label><select id="aiFormat"><option value="smart">Подобрать форматы автоматически</option><option value="triple">Все по 3 на листе</option><option value="portrait">Все вертикальные</option><option value="landscape">Все горизонтальные</option></select></div>
           <div><label for="aiIcons">Значки</label><select id="aiIcons"><option value="smart">Подобрать подходящие</option><option value="auto">Автоматические в редакторе</option><option value="none">Без значков</option></select></div>
@@ -128,6 +129,7 @@
           <textarea id="aiPrompt" rows="11" readonly spellcheck="false" aria-label="Сгенерированный промпт"></textarea>
           <div class="batch-ai-actions">
             <button type="button" id="aiCopy" class="btn btn--secondary"><span data-icon="copy"></span>Скопировать запрос</button>
+            <a id="aiOpenChatGPT" class="btn btn--secondary" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer"><span data-icon="external-link"></span>Открыть ChatGPT</a>
             <button type="button" id="aiDownload" class="btn btn--secondary"><span data-icon="download"></span>Скачать .txt</button>
             <button type="button" id="aiOpenJson" class="btn btn--ghost">Вставить ответ JSON</button>
           </div>
