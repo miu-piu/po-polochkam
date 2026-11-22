@@ -40,5 +40,7 @@ jobs:
           done
           echo "Pages artifact not visible after retries"
           exit 1
+      - name: Allow Pages artifact metadata to synchronize
+        run: sleep 30
       - id: deployment
         uses: actions/deploy-pages@v4
