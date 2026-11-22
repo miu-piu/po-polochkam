@@ -9,7 +9,7 @@ const ICONS={"Кухня":"kitchen","продукт":"food","Круп":"food","�
 const ICON_OPTIONS=[['auto','Автоматически','подбор'],['none','Без значка','нет пусто'],['box','Коробка','хранение шкаф'],['kitchen','Кухня','посуда кастрюля'],['food','Продукты','еда крупы бакалея макароны'],['clothes','Одежда','футболка вещи'],['shoe','Обувь','ботинки сапоги'],['toy','Игрушки','детское конструктор'],['plug','Техника','электроника кабели'],['clean','Уборка','моющие средства'],['heart','Уход','косметика здоровье'],['document','Документы','бумаги договоры'],['paw','Животные','собака лапа'],['star','Хобби','звезда интересы'],['tools','Инструменты','ремонт ключ'],['book','Книги','чтение тетради'],['gift','Подарки','праздники банты'],['suitcase','Поездки','чемодан путешествие']];
 const state={cat:'Все',query:'',sheets:[],sheetIndex:0,activeSlot:0,marked:new Set(),favorites:new Set(),recent:[],manualSlot:false};
 const canvas=$('preview'),ctx=canvas.getContext('2d');
-let installPrompt=null,toastTimer=null;
+let installPrompt=null,toastTimer=null,undoState=null,activeDialog=null,dialogOrigin=null,previousInert=null;
 function uid(){return (globalThis.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2);}
 function newSheet(mode='triple'){return {id:uid(),mode,labels:[null,null,null]};}
 function norm(s){return String(s||'').toLocaleLowerCase('ru-RU').replace(/ё/g,'е').replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim();}
@@ -36,7 +36,27 @@ function restore(){
  if(!state.sheets.length)state.sheets=[newSheet()];if(sheet().mode!=='triple')state.activeSlot=0;
 }
 function save(){try{localStorage.setItem('pp_labels_v3',JSON.stringify({sheets:state.sheets,sheetIndex:state.sheetIndex,activeSlot:state.activeSlot,favorites:[...state.favorites],recent:state.recent}));}catch(e){console.warn('Сохранение недоступно',e);}}
-function toast(s){const el=$('toast');el.textContent=s;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.hidden=true;},2600);}
+function toast(s,withUndo=false){
+ const el=$('toast');$('toastText').textContent=s;$('undoBtn').hidden=!withUndo;el.hidden=false;
+ if(!withUndo)undoState=null;
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>{el.hidden=true;undoState=null;},withUndo?8000:2600);
+}
+function snapshot(){return {sheets:JSON.parse(JSON.stringify(state.sheets)),sheetIndex:state.sheetIndex,activeSlot:state.activeSlot};}
+function destructive(message,action){undoState=snapshot();action();save();refreshSheet();toast(message,true);}
+function undoDestructive(){if(!undoState)return;const last=undoState;undoState=null;state.sheets=last.sheets;state.sheetIndex=last.sheetIndex;state.activeSlot=last.activeSlot;state.manualSlot=false;save();refreshSheet();toast('Изменение отменено');}
+function onMobile(){return window.matchMedia('(max-width: 760px)').matches;}
+function setMobileView(view,focus=false){
+ if(!['library','studio','print'].includes(view))return;
+ $('appShell').dataset.mobileView=view;
+ document.querySelectorAll('#mobileNav button[data-view]').forEach(b=>{
+   if(b.dataset.view===view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+ });
+ if(onMobile()){
+   window.scrollTo(0,0);
+   if(focus){const target=view==='library'?$('search'):view==='studio'?$('studioTitle'):$('printTitle');target.focus({preventScroll:true});}
+ }
+}
 function currentLabel(){return sheet().labels[sheet().mode==='triple'?state.activeSlot:0];}
 function iconFor(label){if(label&&label.icon&&label.icon!=='auto')return label.icon;const title=norm(label?.title||'');for(const [k,v] of Object.entries(ICONS))if(title.includes(norm(k)))return v;const category=norm(label?.category||'');for(const [k,v] of Object.entries(ICONS))if(category.includes(norm(k)))return v;return 'box';}
 function remember(item){state.recent=[{id:item.id||item.title,title:item.title,category:item.category||'',sub:item.sub||''},...state.recent.filter(x=>x.title!==item.title)].slice(0,25);}
@@ -56,14 +76,18 @@ function renderLibrary(){
   const check=document.createElement('input');check.type='checkbox';check.setAttribute('aria-label',`Выбрать ${item.title} для объединения`);check.title='Отметить для объединения';check.checked=state.marked.has(item.id);check.addEventListener('change',()=>{if(check.checked)state.marked.add(item.id);else state.marked.delete(item.id);updateMarked();});
   const thumb=iconThumbnail(iconFor(item),26);
   const label=document.createElement('button');label.type='button';label.className='entry-name';label.title='В активную наклейку';const name=document.createElement('span');name.textContent=item.title;label.appendChild(name);if(item.sub){const sub=document.createElement('small');sub.textContent=item.sub;label.appendChild(sub);}label.addEventListener('click',()=>applyLabel(item));
-  const fav=document.createElement('button');fav.type='button';fav.className='btn btn--icon fav-toggle'+(state.favorites.has(item.id)?' active':'');fav.dataset.icon='star';fav.setAttribute('aria-label',state.favorites.has(item.id)?'Убрать из избранного':'В избранное');fav.title=fav.getAttribute('aria-label');fav.addEventListener('click',()=>{if(state.favorites.has(item.id))state.favorites.delete(item.id);else state.favorites.add(item.id);save();renderLibrary();});
+  const fav=document.createElement('button');fav.type='button';fav.className='btn btn--icon fav-toggle'+(state.favorites.has(item.id)?' active':'');fav.dataset.icon='star';fav.setAttribute('aria-label',state.favorites.has(item.id)?'Убрать из избранного':'В избранное');fav.title=fav.getAttribute('aria-label');fav.addEventListener('click',()=>{
+ if(state.favorites.has(item.id))state.favorites.delete(item.id);else state.favorites.add(item.id);
+ save();renderLibrary();const candidate=[...$('libraryList').querySelectorAll('.fav-toggle')].find(b=>b.dataset.itemId===item.id);
+ (candidate||$('search')).focus({preventScroll:true});
+});fav.dataset.itemId=item.id;
   const add=document.createElement('button');add.type='button';add.className='btn btn--icon add-mini';add.dataset.icon='plus';add.title='В следующее свободное место';add.setAttribute('aria-label',`Добавить ${item.title} в следующее свободное место`);add.addEventListener('click',()=>applyLabel(item,true));
   const checkWrap=document.createElement('label');checkWrap.className='entry-check';checkWrap.appendChild(check);row.append(checkWrap,thumb,label,fav,add);frag.appendChild(row);
  }
  list.appendChild(frag);if(rows.length>200){const h=document.createElement('div');h.className='queue-empty';h.textContent=`Ещё ${rows.length-200} вариантов. Уточни поиск.`;list.appendChild(h);}updateMarked();
 }
 function updateMarked(){const n=state.marked.size;$('combineBtn').disabled=n<2;$('markedCount').textContent=n?`(${n})`:'';}
-function mobileGoStudio(){if(window.innerWidth<=760)$('studioTitle').scrollIntoView({behavior:'smooth',block:'start'});}
+function mobileGoStudio(){if(onMobile())setMobileView('studio',true);}
 function fillSlot(item,at,auto=false){const s=sheet();const slot=s.mode==='triple'?at:0;s.labels[slot]={title:String(item.title||'').trim().slice(0,160),detail:String(item.detail||'').slice(0,100),icon:item.icon||'auto',category:item.category||''};state.activeSlot=slot;if(s.mode==='triple'&&auto){const next=s.labels.findIndex((l,i)=>i>slot&&!filled(l));if(next>=0)state.activeSlot=next;}save();refreshSheet();}
 function firstFree(s){return s.mode==='triple'?s.labels.findIndex(l=>!filled(l)):filled(s.labels[0])?-1:0;}
 function applyLabel(item,auto=false){
@@ -75,13 +99,17 @@ function applyLabel(item,auto=false){
 function combineMarked(){const items=CATALOG.filter(x=>state.marked.has(x.id));if(items.length<2)return;const title=items.map(x=>x.title).join(' · ');state.marked.clear();applyLabel({title,detail:'',icon:'auto',category:items[0].category});}
 function renderEditor(){const l=currentLabel()||{};$('editorSlot').textContent=sheet().mode==='triple'?`№ ${state.activeSlot+1}`:'на листе';$('titleInput').value=l.title||'';$('detailInput').value=l.detail||'';$('iconSelect').value=l.icon||'auto';}
 function syncEditor(){const l={title:$('titleInput').value,detail:$('detailInput').value,icon:$('iconSelect').value,category:currentLabel()?.category||''};sheet().labels[sheet().mode==='triple'?state.activeSlot:0]=(l.title||l.detail)?l:null;save();renderPreview();renderSheetList();updateSheetMeta();}
-function selectSlot(i){const s=sheet();state.activeSlot=s.mode==='triple'?Math.max(0,Math.min(2,i)):0;state.manualSlot=true;save();renderPreview();renderEditor();updateSheetMeta();}
+function selectSlot(i,returnTo=null){
+ const s=sheet();state.activeSlot=s.mode==='triple'?Math.max(0,Math.min(2,i)):0;state.manualSlot=true;save();renderPreview();renderEditor();updateSheetMeta();
+ if(returnTo==='canvas')$('slotOverlay').children[state.activeSlot]?.focus({preventScroll:true});
+ else if(returnTo==='bar')$('slotButtons').children[state.activeSlot]?.focus({preventScroll:true});
+}
 function renderPreview(){
  const s=sheet(),wide=s.mode==='landscape';canvas.width=wide?H:W;canvas.height=wide?W:H;$('previewPaper').classList.toggle('landscape',wide);
  renderSurface(ctx,s.labels,s.mode,true);const overlay=$('slotOverlay');overlay.replaceChildren();const bar=$('slotButtons');bar.replaceChildren();const count=s.mode==='triple'?3:1;
  for(let i=0;i<count;i++){
-  if(s.mode==='triple'){const hit=document.createElement('button');hit.type='button';hit.className='slot-hit'+(i===state.activeSlot?' active':'');hit.style.top=`${i/3*100}%`;hit.style.height='33.33334%';hit.title=`Редактировать наклейку ${i+1}`;hit.setAttribute('aria-label',`Редактировать наклейку ${i+1}`);hit.addEventListener('click',()=>selectSlot(i));const tag=document.createElement('span');tag.className='slot-num';tag.textContent=String(i+1);hit.appendChild(tag);overlay.appendChild(hit);}
-  const button=document.createElement('button');button.type='button';button.className='chip slot-button'+(i===state.activeSlot?' active':'')+(filled(s.labels[i])?' filled':'');button.textContent=s.mode==='triple'?String(i+1):'1';button.setAttribute('aria-pressed',String(i===state.activeSlot));button.setAttribute('aria-label',`Наклейка ${i+1}${filled(s.labels[i])?' заполнена':''}`);button.addEventListener('click',()=>selectSlot(i));bar.appendChild(button);
+  if(s.mode==='triple'){const hit=document.createElement('button');hit.type='button';hit.className='slot-hit'+(i===state.activeSlot?' active':'');hit.style.top=`${i/3*100}%`;hit.style.height='33.33334%';hit.title=`Редактировать наклейку ${i+1}`;hit.setAttribute('aria-label',`Редактировать наклейку ${i+1}`);hit.addEventListener('click',()=>selectSlot(i,'canvas'));const tag=document.createElement('span');tag.className='slot-num';tag.textContent=String(i+1);hit.appendChild(tag);overlay.appendChild(hit);}
+  const button=document.createElement('button');button.type='button';button.className='chip slot-button'+(i===state.activeSlot?' active':'')+(filled(s.labels[i])?' filled':'');button.textContent=s.mode==='triple'?String(i+1):'1';button.setAttribute('aria-pressed',String(i===state.activeSlot));button.setAttribute('aria-label',`Наклейка ${i+1}${filled(s.labels[i])?' заполнена':''}`);button.addEventListener('click',()=>selectSlot(i,'bar'));bar.appendChild(button);
  }
  $('slotLegend').textContent=s.mode==='triple'?`Редактируется наклейка ${state.activeSlot+1}`:'Редактируется весь лист';
  $('moveUp').disabled=s.mode!=='triple'||state.activeSlot===0;$('moveDown').disabled=s.mode!=='triple'||state.activeSlot===2;$('duplicateSlot').disabled=!filled(currentLabel());$('clearSlot').disabled=!currentLabel();
@@ -94,6 +122,7 @@ function renderSheetList(){
  for(const [text,title,action,disabled] of [['↑','Поднять лист',()=>moveSheet(i,-1),i===0],['↓','Опустить лист',()=>moveSheet(i,1),i===state.sheets.length-1],['×','Удалить лист',()=>deleteSheet(i),state.sheets.length===1&&!sheetFilled(s)]]){const bt=document.createElement('button');bt.type='button';bt.className='btn btn--icon queue-action'+(text==='×'?' danger':'');bt.dataset.icon=text==='↑'?'arrow-up':text==='↓'?'arrow-down':'trash-2';bt.title=title;bt.setAttribute('aria-label',`${title} ${i+1}`);bt.disabled=disabled;bt.addEventListener('click',action);row.appendChild(bt);}list.appendChild(row);});
  $('queueCount').textContent=String(countLabels());$('pageCount').textContent=`${usableSheets().length} листов · ${countLabels()} наклеек`;
  $('pdfBtn').disabled=!usableSheets().length;$('pngBtn').disabled=!sheetFilled(sheet());$('shareBtn').disabled=!usableSheets().length;
+ $('quickPdfBtn').disabled=!usableSheets().length;$('studioPageCount').textContent=String(usableSheets().length);
 }
 function refreshSheet(){renderPreview();renderEditor();renderSheetList();updateSheetMeta();}
 function goSheet(i){if(i<0||i>=state.sheets.length)return;state.sheetIndex=i;state.activeSlot=0;state.manualSlot=false;save();refreshSheet();}
@@ -103,16 +132,45 @@ function modeUpdate(mode){if(!['triple','portrait','landscape'].includes(mode))r
  if(mode!=='triple'){const existing=s.labels.find(filled);s.labels=[existing||null,null,null];state.activeSlot=0;}
  s.mode=mode;save();refreshSheet();}
 function moveSheet(i,d){const j=i+d;if(j<0||j>=state.sheets.length)return;[state.sheets[i],state.sheets[j]]=[state.sheets[j],state.sheets[i]];if(state.sheetIndex===i)state.sheetIndex=j;else if(state.sheetIndex===j)state.sheetIndex=i;save();refreshSheet();}
-function deleteSheet(i){if(!state.sheets[i])return;if(state.sheets.length===1){state.sheets=[newSheet(sheet().mode)];state.sheetIndex=0;state.activeSlot=0;save();refreshSheet();return;}if(sheetFilled(state.sheets[i])&&!confirm(`Удалить заполненный лист № ${i+1}?`))return;state.sheets.splice(i,1);if(i<state.sheetIndex)state.sheetIndex--;state.sheetIndex=Math.max(0,Math.min(state.sheetIndex,state.sheets.length-1));state.activeSlot=0;save();refreshSheet();}
-function clearSlot(){sheet().labels[state.activeSlot]=null;save();refreshSheet();}
-function clearSheet(){if(sheetFilled(sheet())&&!confirm('Очистить все надписи на этом листе?'))return;sheet().labels=[null,null,null];state.activeSlot=0;save();refreshSheet();}
+function deleteSheet(i){if(!state.sheets[i])return;destructive('Лист удалён',()=>{
+ if(state.sheets.length===1){state.sheets=[newSheet(sheet().mode)];state.sheetIndex=0;}
+ else{state.sheets.splice(i,1);if(i<state.sheetIndex)state.sheetIndex--;state.sheetIndex=Math.max(0,Math.min(state.sheetIndex,state.sheets.length-1));}
+ state.activeSlot=0;state.manualSlot=false;
+});}
+function clearSlot(){if(!currentLabel())return;destructive('Наклейка очищена',()=>{sheet().labels[state.activeSlot]=null;});}
+function clearSheet(){if(!sheetFilled(sheet()))return;destructive('Лист очищен',()=>{sheet().labels=[null,null,null];state.activeSlot=0;});}
 function swapSlots(d){if(sheet().mode!=='triple')return;const i=state.activeSlot,j=i+d;if(j<0||j>2)return;[sheet().labels[i],sheet().labels[j]]=[sheet().labels[j],sheet().labels[i]];state.activeSlot=j;save();refreshSheet();}
 function nextFree(){const s=sheet();if(s.mode!=='triple'){addSheet(s.mode);$('titleInput').focus();return;}const f=firstFree(s);if(f===-1){addSheet(s.mode);}else selectSlot(f);$('titleInput').focus();}
 function duplicateSlot(){const l=currentLabel();if(!filled(l)){toast('Сначала заполни наклейку');return;}const copy={...l};const s=sheet();let index=-1;if(s.mode==='triple')index=s.labels.findIndex((v,i)=>i!==state.activeSlot&&!filled(v));if(index>=0){s.labels[index]=copy;state.activeSlot=index;save();refreshSheet();}else{addSheet(s.mode);fillSlot(copy,0,false);}toast('Наклейка продублирована');}
-function clearAll(){if(countLabels()&&!confirm('Удалить все подготовленные листы?'))return;state.sheets=[newSheet()];state.sheetIndex=0;state.activeSlot=0;save();refreshSheet();}
+function clearAll(){if(countLabels()&&!confirm('Очистить все подготовленные листы? Действие можно отменить.'))return;destructive('Все листы очищены',()=>{state.sheets=[newSheet()];state.sheetIndex=0;state.activeSlot=0;});}
 function newCustom(){const text=$('search').value.trim();if(!state.manualSlot&&filled(currentLabel())){const free=firstFree(sheet());if(free>=0)state.activeSlot=free;else addSheet(sheet().mode);}sheet().labels[state.activeSlot]={title:text,detail:'',icon:'auto',category:''};state.manualSlot=true;save();refreshSheet();mobileGoStudio();$('titleInput').focus();}
-function openDialog(id){$(id).hidden=false;const field=$(id).querySelector('input,button');field?.focus();}
-function closeDialog(id){$(id).hidden=true;}
+function dialogFocusable(){if(!activeDialog)return [];return [...activeDialog.querySelectorAll('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>!el.hidden&&el.getClientRects().length>0);}
+function openDialog(id){
+ const dialog=$(id);if(!dialog||!dialog.hidden)return;
+ if(activeDialog)closeDialog(activeDialog.id);
+ dialogOrigin=document.activeElement;activeDialog=dialog;dialog.hidden=false;
+ previousInert=new Map();
+ for(const el of document.body.children){if(el!==dialog&&el.tagName!=='SCRIPT'){previousInert.set(el,el.inert);el.inert=true;}}
+ document.body.classList.add('dialog-open');
+ const first=dialog.querySelector('input')||dialogFocusable()[0];first?.focus();
+}
+function closeDialog(id){
+ const dialog=$(id);if(!dialog||dialog.hidden)return;
+ dialog.hidden=true;
+ if(activeDialog!==dialog)return;
+ for(const [el,value] of previousInert||[])el.inert=value;
+ previousInert=null;activeDialog=null;document.body.classList.remove('dialog-open');
+ if(dialogOrigin?.isConnected)dialogOrigin.focus({preventScroll:true});dialogOrigin=null;
+}
+function dialogKeys(e){
+ if(!activeDialog)return;
+ if(e.key==='Escape'){e.preventDefault();closeDialog(activeDialog.id);return;}
+ if(e.key!=='Tab')return;
+ const focusables=dialogFocusable();if(!focusables.length){e.preventDefault();return;}
+ const first=focusables[0],last=focusables[focusables.length-1];
+ if(e.shiftKey&&(document.activeElement===first||!activeDialog.contains(document.activeElement))){e.preventDefault();last.focus();}
+ else if(!e.shiftKey&&(document.activeElement===last||!activeDialog.contains(document.activeElement))){e.preventDefault();first.focus();}
+}
 function renderIconGrid(q=''){const grid=$('iconGrid');grid.replaceChildren();for(const [key,name,aliases] of ICON_OPTIONS){if(q&&!norm(key+' '+name+' '+aliases).includes(norm(q)))continue;const b=document.createElement('button');b.type='button';b.className='icon-card';if(key!=='none')b.appendChild(iconThumbnail(key,37));else{const blank=document.createElement('div');blank.style.height='37px';blank.textContent='—';b.appendChild(blank);}const t=document.createElement('span');t.textContent=name;b.appendChild(t);b.addEventListener('click',()=>{$('iconSelect').value=key;syncEditor();closeDialog('iconDialog');});grid.appendChild(b);}if(!grid.childNodes.length)grid.textContent='Иконки не найдены';}
 function drawIcon(g,name,x,y,s){if(name==='none')return;g.save();g.translate(x,y);g.scale(s/100,s/100);g.strokeStyle='#18231c';g.fillStyle='#18231c';g.lineWidth=5.5;g.lineCap='round';g.lineJoin='round';const line=(...points)=>{g.beginPath();g.moveTo(points[0],points[1]);for(let i=2;i<points.length;i+=2)g.lineTo(points[i],points[i+1]);g.stroke()};const rect=(x,y,w,h,r=3)=>{g.beginPath();g.roundRect(x,y,w,h,r);g.stroke()};const circle=(x,y,r)=>{g.beginPath();g.arc(x,y,r,0,2*Math.PI);g.stroke()};switch(name){
 case 'kitchen':rect(-36,-12,72,50,8);line(-40,-15,40,-15);line(-18,-22,-10,-30,10,-30,18,-22);line(-27,40,-27,47);line(27,40,27,47);break;
@@ -181,12 +239,18 @@ function makeFilename(ext){return `По-полочкам_75x120_${new Date().toI
 function pdfBlob(){const pages=usableSheets().map(s=>physicalPage(s.labels,s.mode));if(!pages.length)throw Error('Нет заполненных наклеек');return buildPdf(pages);}
 async function toPng(c){return new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error('PNG не создан')),'image/png'));}
 function exportPdf(){try{download(pdfBlob(),makeFilename('pdf'));toast('PDF подготовлен — открой его в Label Expert');}catch(e){toast(e.message);}}
-async function exportPng(){try{if(!sheetFilled(sheet()))throw Error('Этот лист пуст');const b=await toPng(physicalPage(sheet().labels,sheet().mode));download(b,makeFilename('png'));toast('PNG первого листа сохранён');}catch(e){toast(e.message);}}
+async function exportPng(){try{if(!sheetFilled(sheet()))throw Error('Этот лист пуст');const b=await toPng(physicalPage(sheet().labels,sheet().mode));download(b,makeFilename('png'));toast('PNG текущего листа сохранён');}catch(e){toast(e.message);}}
 async function sharePdf(){try{const blob=pdfBlob();const file=new File([blob],makeFilename('pdf'),{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'По полочкам — наклейки'});}else{download(blob,file.name);toast('Поделиться недоступно — PDF скачан');}}catch(e){if(e.name!=='AbortError')toast(e.message);}}
 function init(){
  restore();
  $('catalogCount').textContent=`${CATALOG.length} названий`;
  for(const [key,name] of ICON_OPTIONS){if(key==='auto'||key==='none')continue;const o=document.createElement('option');o.value=key;o.textContent=name;$('iconSelect').appendChild(o);}
+ $('undoBtn').addEventListener('click',undoDestructive);
+ document.querySelectorAll('#mobileNav button[data-view]').forEach(b=>b.addEventListener('click',()=>setMobileView(b.dataset.view,true)));
+ $('openLibraryBtn').addEventListener('click',()=>setMobileView('library',true));
+ $('openPrintBtn').addEventListener('click',()=>{if(onMobile())setMobileView('print',true);else {$('printTitle').scrollIntoView({behavior:'smooth',block:'start'});$('printTitle').focus({preventScroll:true});}});
+ $('quickPdfBtn').addEventListener('click',exportPdf);
+ document.addEventListener('keydown',dialogKeys,true);
  $('search').addEventListener('input',e=>{state.query=e.target.value;renderLibrary();});
  $('combineBtn').addEventListener('click',combineMarked);
  $('customBtn').addEventListener('click',newCustom);
@@ -199,7 +263,7 @@ function init(){
  $('helpBtn').addEventListener('click',()=>openDialog('helpDialog'));
  $('closeHelpBtn').addEventListener('click',()=>closeDialog('helpDialog'));
  for(const id of ['iconDialog','helpDialog'])$(id).addEventListener('click',e=>{if(e.target===$(id))closeDialog(id);});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDialog('iconDialog');closeDialog('helpDialog');}});
+
  $('prevSheet').addEventListener('click',()=>goSheet(state.sheetIndex-1));
  $('nextSheet').addEventListener('click',()=>goSheet(state.sheetIndex+1));
  $('newSheet').addEventListener('click',()=>addSheet());
@@ -221,5 +285,5 @@ function init(){
  if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
 init();
-if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='about:')window.__PP_TEST__={state,physicalPage,pdfBlob,usableSheets,goSheet,applyLabel,modeUpdate,addSheet,selectSlot,fillSlot,clearAll};
+if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='about:')window.__PP_TEST__={state,physicalPage,pdfBlob,usableSheets,goSheet,applyLabel,modeUpdate,addSheet,selectSlot,fillSlot,clearAll,setMobileView,undoDestructive};
 })();
