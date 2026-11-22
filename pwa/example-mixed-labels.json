@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "labels": [
+    {
+      "title": "Макароны",
+      "format": "triple",
+      "icon": "food"
+    },
+    {
+      "title": "Крупы",
+      "format": "triple",
+      "detail": "Бакалея",
+      "icon": "food"
+    },
+    {
+      "title": "Семена",
+      "format": "triple",
+      "icon": "food"
+    },
+    {
+      "title": "Зимняя одежда",
+      "format": "portrait",
+      "detail": "Размер 86–92",
+      "icon": "clothes"
+    },
+    {
+      "title": "Зарядки и кабели",
+      "format": "landscape",
+      "icon": "plug"
+    },
+    {
+      "title": "Документы",
+      "format": "triple",
+      "icon": "document"
+    }
+  ]
+}

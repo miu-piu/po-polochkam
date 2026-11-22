@@ -44,6 +44,7 @@
       <div class="library-footer">
         <button type="button" class="btn btn--secondary full" id="combineBtn" disabled>Объединить выбранные <span id="markedCount"></span></button>
         <button type="button" class="btn btn--secondary full" id="customBtn"><span data-icon="plus"></span>Своя наклейка</button>
+        <button type="button" class="btn btn--secondary full" id="bulkOpenBtn"><span data-icon="list-plus"></span>Добавить списком / JSON</button>
         <p><b>Нажми на название</b> — добавится в выбранное место на листе. Галочки объединяют названия в одну наклейку.</p>
       </div>
     </section>
@@ -64,6 +65,7 @@
         <div class="edit-title"><strong>Подпись <span id="editorSlot">№ 1</span></strong><span class="auto-note">Сохраняется автоматически</span></div>
         <label for="titleInput">Название</label><textarea id="titleInput" rows="2" maxlength="160" placeholder="Например: МАКАРОНЫ · КРУПЫ · СЕМЕНА"></textarea>
         <div class="edit-grid"><div><label for="detailInput">Подпись <span class="muted">необязательно</span></label><input id="detailInput" maxlength="100" placeholder="Например: сухие продукты"></div><div><label for="iconSelect">Значок</label><div class="icon-input"><select id="iconSelect"><option value="auto">Авто</option><option value="none">Без значка</option></select><button id="pickIconBtn" type="button" class="btn btn--icon" title="Подбор иконки" aria-label="Выбрать значок" data-icon="panels-top-left"></button></div></div></div>
+        <div class="label-image-tools"><label for="labelImageFile" class="btn btn--secondary">Добавить картинку</label><input id="labelImageFile" type="file" accept="image/png,image/jpeg,image/webp" hidden><button id="removeLabelImage" type="button" class="btn btn--ghost" hidden>Удалить картинку</button><small id="labelImageStatus">Без своей картинки</small></div>
         <div class="editor-bottom"><button id="fillNext" class="btn btn--secondary" type="button">Следующая пустая</button><button id="clearSheet" class="btn btn--ghost" type="button">Очистить лист</button></div>
       </div>
     </section>
@@ -87,9 +89,36 @@
   <div class="dialog-backdrop" id="iconDialog" hidden role="dialog" aria-modal="true" aria-labelledby="iconDialogTitle">
     <div class="dialog-panel"><div class="dialog-head"><h2 id="iconDialogTitle">Выбрать значок</h2><button class="btn btn--icon close-dialog" id="closeIconBtn" type="button" aria-label="Закрыть" data-icon="x"></button></div><input id="iconSearch" type="search" placeholder="Поиск: еда, одежда, игрушки…" aria-label="Поиск значка"><div id="iconGrid" class="icon-grid"></div></div>
   </div>
-  <div class="dialog-backdrop" id="helpDialog" hidden role="dialog" aria-modal="true" aria-labelledby="helpDialogTitle"><div class="dialog-panel"><div class="dialog-head"><h2 id="helpDialogTitle">Как пользоваться</h2><button class="btn btn--icon close-dialog" id="closeHelpBtn" type="button" aria-label="Закрыть" data-icon="x"></button></div><p><strong>1. Выберите формат.</strong> Три небольшие наклейки на одном листе или одну большую — вертикальную либо горизонтальную.</p><p><strong>2. Добавьте надпись.</strong> Найдите готовое название в разделе «Готовые» или создайте своё. Нажмите на нужную наклейку в макете, чтобы изменить текст, уточнение или значок.</p><p><strong>3. Подготовьте листы.</strong> Добавляйте названия одно за другим: когда все места заняты, приложение создаёт следующий лист автоматически. При необходимости лист можно добавить вручную. Все заполненные листы сохраняются в одном PDF.</p><p><strong>Большая партия.</strong> Например, 50 небольших наклеек займут 17 листов (по три на каждом, кроме последнего). Скачайте общий PDF и импортируйте его в Label Expert. Перед большой партией проверьте печать двух страниц: возможность отправить весь многостраничный PDF на печать одним заданием зависит от Label Expert.</p><p><strong>4. Распечатайте.</strong> В разделе «Печать» скачайте PDF или PNG, откройте файл в Label Expert и выберите размер 75 × 120 мм без изменения масштаба.</p><p><strong>Автосохранение.</strong> Черновики хранятся в браузере на этом устройстве. Регистрация не нужна, синхронизации между устройствами нет.</p><p><strong>iPhone и iPad.</strong> Чтобы установить приложение, откройте его в Safari и выберите «Поделиться» → «На экран Домой». Для передачи PDF другому приложению удобно использовать кнопку «Поделиться PDF».</p></div></div>
+  <div class="dialog-backdrop" id="helpDialog" hidden role="dialog" aria-modal="true" aria-labelledby="helpDialogTitle"><div class="dialog-panel"><div class="dialog-head"><h2 id="helpDialogTitle">Как пользоваться</h2><button class="btn btn--icon close-dialog" id="closeHelpBtn" type="button" aria-label="Закрыть" data-icon="x"></button></div><p><strong>1. Выберите формат.</strong> Три небольшие наклейки на одном листе или одну большую — вертикальную либо горизонтальную.</p><p><strong>2. Добавьте надпись.</strong> Найдите готовое название в разделе «Готовые» или создайте своё. Нажмите на нужную наклейку в макете, чтобы изменить текст, уточнение или значок.</p><p><strong>3. Подготовьте листы.</strong> Добавляйте названия одно за другим: когда все места заняты, приложение создаёт следующий лист автоматически. При необходимости лист можно добавить вручную. Все заполненные листы сохраняются в одном PDF.</p><p><strong>Большая партия.</strong> Например, 50 небольших наклеек займут 17 листов (по три на каждом, кроме последнего). Для быстрого создания откройте «Добавить списком / JSON»: обычный список содержит по одному названию в строке, а JSON позволяет смешивать все три формата и добавлять изображения. Скачайте общий PDF и импортируйте его в Label Expert. Перед большой партией проверьте печать двух страниц: возможность отправить весь многостраничный PDF на печать одним заданием зависит от Label Expert.</p><p><strong>4. Распечатайте.</strong> В разделе «Печать» скачайте PDF или PNG, откройте файл в Label Expert и выберите размер 75 × 120 мм без изменения масштаба.</p><p><strong>Автосохранение.</strong> Черновики хранятся в браузере на этом устройстве. Регистрация не нужна, синхронизации между устройствами нет.</p><p><strong>iPhone и iPad.</strong> Чтобы установить приложение, откройте его в Safari и выберите «Поделиться» → «На экран Домой». Для передачи PDF другому приложению удобно использовать кнопку «Поделиться PDF».</p></div></div>
+  <div class="dialog-backdrop" id="bulkDialog" hidden role="dialog" aria-modal="true" aria-labelledby="bulkDialogTitle">
+    <div class="dialog-panel bulk-panel">
+      <div class="dialog-head"><h2 id="bulkDialogTitle">Добавить много наклеек</h2><button type="button" id="bulkCloseBtn" class="btn btn--icon close-dialog" aria-label="Закрыть" data-icon="x"></button></div>
+      <div class="batch-tabs" id="bulkTabs" role="group" aria-label="Способ добавления">
+        <button type="button" class="btn btn--secondary" data-kind="list" aria-pressed="true">Списком</button>
+        <button type="button" class="btn btn--secondary" data-kind="json" aria-pressed="false">JSON</button>
+      </div>
+      <div id="bulkListPane" class="batch-pane">
+        <label for="bulkListFormat">Формат для всех строк</label>
+        <select id="bulkListFormat"><option value="triple">3 на листе</option><option value="portrait">1 вертикальная</option><option value="landscape">1 горизонтальная</option></select>
+        <label for="bulkLines">Каждая строка — отдельная наклейка</label>
+        <textarea id="bulkLines" rows="7" placeholder="Макароны&#10;Крупы&#10;Семена&#10;Специи"></textarea>
+      </div>
+      <div id="bulkJsonPane" class="batch-pane" hidden>
+        <p class="batch-hint">JSON может содержать разные форматы в одном списке. Для каждой наклейки нужны <code>title</code> и <code>format</code>; необязательно: <code>detail</code>, <code>icon</code>, <code>image</code>.</p>
+        <div class="batch-toolbar"><button type="button" class="btn btn--ghost" id="bulkExample">Показать пример JSON</button></div>
+        <label for="bulkJson">Вставьте JSON</label><textarea id="bulkJson" rows="9" spellcheck="false" autocapitalize="off" placeholder='{ "labels": [{ "title": "Макароны", "format": "triple" }] }'></textarea>
+        <p class="batch-hint">Для собственной картинки используйте <code>"image": "photo.png"</code> и прикрепите файл либо вставьте <code>data:image/png;base64,...</code> прямо в JSON. Значок: <code>"icon": "food"</code>. Внешние ссылки не поддерживаются.</p>
+      </div>
+      <label class="btn btn--secondary batch-file-button" for="bulkFiles"><span data-icon="upload"></span>Выбрать JSON и картинки</label>
+      <input id="bulkFiles" type="file" accept=".json,.png,.jpg,.jpeg,.webp,application/json,image/png,image/jpeg,image/webp" multiple hidden>
+      <small class="batch-hint" id="bulkFileName">Можно выбрать JSON и изображения одновременно.</small>
+      <div id="bulkPreview" class="batch-preview" aria-live="polite">Вставьте список для предварительного просмотра.</div>
+      <button id="bulkApply" type="button" class="btn btn--primary full" disabled>Добавить наклейки</button>
+      <p class="batch-hint">Существующие листы сохранятся. Новые наклейки добавятся в конец; порядок и форматы сохранятся. Максимум 120 листов в черновике.</p>
+    </div>
+  </div>
   <div id="toast" role="status" aria-live="polite" class="toast" hidden><span id="toastText"></span><button id="undoBtn" type="button" class="btn btn--toast-undo" hidden>Отменить</button></div>
   <footer class="site-footer">Сделано для домашних порядков</footer>
-  <script src="./ui.js"></script><script src="./catalog.js"></script><script src="./app.js"></script>
+  <script src="./ui.js"></script><script src="./catalog.js"></script><script src="./bulk.js"></script><script src="./app.js"></script>
 </body>
 </html>

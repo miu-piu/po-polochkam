@@ -24,6 +24,8 @@ const icons={
  'check':'<path d="m20 6-11 11-5-5"/>',
  'package':'<path d="m12 2 9 5-9 5-9-5 9-5ZM3 7v10l9 5 9-5V7M12 12v10"/>',
  'list':'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+ 'list-plus':'<path d="M3 6h9M3 12h9M3 18h9M18 9v6m-3-3h6"/>',
+ 'upload':'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
  'pencil':'<path d="m15 5 4 4M4 20l4.5-1 11-11a2.83 2.83 0 0 0-4-4l-11 11L4 20Z"/>',
  'arrow-up-down':'<path d="M7 15V3m-4 4 4-4 4 4M17 9v12m-4-4 4 4 4-4"/>',
  'panels-top-left':'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/>'
@@ -35,3 +37,4 @@ function init(){decorate();const observer=new MutationObserver(ms=>{for(const m 
 window.PP_UI={icon,decorate};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
+
