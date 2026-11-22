@@ -129,10 +129,12 @@ function displayPreview(){
  }catch(e){parsed=[];out.className='batch-preview error';out.textContent=e.message;button.disabled=true;}
 }
 function setKind(next){
+ if(!['list','json','ai'].includes(next))return;
  kind=next;
- $('bulkListPane').hidden=next!=='list';$('bulkJsonPane').hidden=next!=='json';
+ $('bulkListPane').hidden=next!=='list';$('bulkJsonPane').hidden=next!=='json';$('bulkAiPane').hidden=next!=='ai';
+ $('bulkFileArea').hidden=next==='ai';$('bulkImportActions').hidden=next==='ai';
  for(const b of document.querySelectorAll('#bulkTabs button'))b.setAttribute('aria-pressed',String(b.dataset.kind===next));
- displayPreview();
+ if(next!=='ai')displayPreview();
 }
 async function onFilesChanged(){
  const files=[...$('bulkFiles').files];
@@ -195,6 +197,5 @@ function init(handlers){
  $('removeLabelImage').addEventListener('click',()=>{const r=bridge.setImage(null);if(r.error)bridge.notify(r.error);else bridge.notify('Картинка удалена');});
  setKind('list');
 }
-window.PPBulk={init,preloadImage,paintImage};
+window.PPBulk={init,preloadImage,paintImage,setKind};
 })();
-

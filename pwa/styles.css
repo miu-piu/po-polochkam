@@ -332,3 +332,15 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 .label-image-tools small{width:100%;color:var(--text-secondary);font-size:12px}
 @media(max-width:760px){.bulk-panel{padding:var(--s4)}.batch-pane textarea{min-height:140px}.bulk-panel .btn{min-height:48px}}
 
+/* Batch request creator: follows the same minimal UI kit. */
+.batch-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+.batch-tabs button{min-width:0;padding:8px;font-size:13px}
+.batch-ai-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
+.batch-ai-options>div{min-width:0}
+.batch-ai-options select{width:100%;min-width:0}
+.batch-ai-actions{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s3)}
+.batch-ai-actions .btn{flex:1 1 150px;min-width:0}
+.batch-template-link{display:inline-block;min-height:44px;padding:var(--s3) 0;color:var(--accent);font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+#aiPrompt{min-height:230px;font-family:var(--font);font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+#bulkAiPane{min-width:0}
+@media(max-width:760px){.batch-ai-options{grid-template-columns:minmax(0,1fr)}.batch-tabs button{font-size:12px}}
