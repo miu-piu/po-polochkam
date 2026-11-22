@@ -1,13 +1,26 @@
 {
-  "name":"По полочкам — наклейки для дома",
-  "short_name":"По полочкам",
-  "description":"Подготовка красивых этикеток 75×120 мм для Label Expert.",
-  "lang":"ru-RU",
-  "id":"./",
-  "start_url":"./",
-  "scope":"./",
-  "display":"standalone",
-  "background_color":"#f6f7f2",
-  "theme_color":"#f6f7f2",
-  "icons":[{"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]
+  "name": "По полочкам — наклейки для дома",
+  "short_name": "По полочкам",
+  "description": "Тёплый блокнот для создания наклеек 75×120 мм. Работает офлайн.",
+  "lang": "ru-RU",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6edce",
+  "theme_color": "#6b422e",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
