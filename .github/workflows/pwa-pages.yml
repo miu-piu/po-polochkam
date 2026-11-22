@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 concurrency:
@@ -25,5 +26,19 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: './pwa'
+      - name: Wait for Pages artifact to appear in GitHub API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 15); do
+            found=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" --jq '[.artifacts[] | select(.name == "github-pages")] | length' || echo 0)
+            if [ "$found" -gt 0 ]; then
+              echo "Pages artifact is available"
+              exit 0
+            fi
+            sleep 4
+          done
+          echo "Pages artifact not visible after retries"
+          exit 1
       - id: deployment
         uses: actions/deploy-pages@v4
