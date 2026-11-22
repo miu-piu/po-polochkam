@@ -112,10 +112,14 @@
         <p class="batch-hint">Своя картинка: <code>"image": "photo.png"</code> и прикреплённый файл либо <code>data:image/png;base64,...</code> прямо в JSON. Картинка заменяет значок; ссылки на сайты не поддерживаются.</p>
       </div>
       <div id="bulkAiPane" class="batch-pane" hidden>
-        <p class="batch-hint">Опишите, что нужно подписать. Приложение подготовит готовый запрос для ChatGPT с точными правилами JSON, доступными иконками и форматами. Само обращение к ИИ выполняется в отдельном чате.</p>
-        <label for="aiItems">Что нужно подписать</label>
-        <textarea id="aiItems" rows="5" maxlength="12000" placeholder="Например: коробки с зимней одеждой, шапками, документами, проводами, мелкими игрушками. Нужно 30 наклеек, часть больших."></textarea>
+        <p class="batch-hint">Выберите сценарий. Для описи вещей сначала спроектируйте места хранения. Если подписи уже определены, можно сразу запросить JSON. Приложение не обращается к ChatGPT самостоятельно.</p>
+        <label for="aiWorkflow">Что нужно сделать</label>
+        <select id="aiWorkflow"><option value="organize">Организовать хранение, потом сделать наклейки</option><option value="direct">Сразу получить JSON для наклеек</option></select>
+        <p class="batch-hint" id="aiWorkflowHint">Для описи вещей, мебели или фотографий: сначала спланируйте размещение, согласуйте подписи и лишь затем получите JSON.</p>
+        <label for="aiItems">Описание вещей, мебели и задачи</label>
+        <textarea id="aiItems" rows="5" maxlength="12000" placeholder="Например: комод с шестью ящиками, детская домашняя одежда, бельё взрослых и носки. Нужно, чтобы все члены семьи могли находить и убирать вещи."></textarea>
         <p class="batch-hint">Если перечень вещей находится в документе или таблице, приложите файл к сообщению в ChatGPT вместе с промптом. Здесь достаточно написать, что следует использовать этот файл.</p>
+        <div id="aiProductionOptions" hidden>
         <div class="batch-ai-options">
           <div><label for="aiFormat">Расположение наклеек</label><select id="aiFormat"><option value="smart">Подобрать форматы автоматически</option><option value="triple">Все по 3 на листе</option><option value="portrait">Все вертикальные</option><option value="landscape">Все горизонтальные</option></select></div>
           <div><label for="aiIcons">Значки</label><select id="aiIcons"><option value="smart">Подобрать подходящие</option><option value="auto">Автоматические в редакторе</option><option value="none">Без значков</option></select></div>
@@ -123,6 +127,7 @@
         <label for="aiImages">Файлы собственных картинок (если есть)</label>
         <textarea id="aiImages" rows="2" maxlength="4000" placeholder="korobka.png&#10;winter.jpg"></textarea>
         <p class="batch-hint">Только реально существующие файлы PNG/JPEG/WebP. Укажите имена по одному в строке и затем приложите эти картинки к импорту JSON. Необязательное поле.</p>
+        </div>
         <button type="button" id="aiGenerate" class="btn btn--primary full">Сгенерировать промпт</button>
         <div id="aiPromptBox" hidden>
           <label for="aiPrompt">Готовый запрос для ChatGPT</label>
@@ -134,7 +139,7 @@
             <button type="button" id="aiOpenJson" class="btn btn--ghost">Вставить ответ JSON</button>
           </div>
         </div>
-        <a href="./chatgpt-prompt-template.txt" download="po-polochkam-chatgpt-prompt.txt" class="batch-template-link">Скачать универсальный шаблон промпта для ChatGPT</a>
+        <a id="aiTemplateLink" href="./chatgpt-storage-organizer.txt" download="po-polochkam-storage-organizer.txt" class="batch-template-link">Скачать шаблон для проектирования хранения</a>
         <p id="aiPromptFeedback" class="batch-hint" role="status" aria-live="polite">Нажмите «Сгенерировать промпт», затем отправьте полученный текст в чат с ИИ. Ответ JSON вставьте на соседней вкладке.</p>
       </div>
       <div id="bulkFileArea">
